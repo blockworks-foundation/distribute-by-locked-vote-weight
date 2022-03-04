@@ -42,8 +42,7 @@ impl<'info> Claim<'info> {
 
 pub fn claim(ctx: Context<Claim>) -> Result<()> {
     let distribution = ctx.accounts.distribution.load()?;
-    let now_ts = distribution.clock_unix_timestamp();
-    require!(now_ts >= distribution.end_ts, ErrorKind::SomeError);
+    require!(distribution.in_claim_phase, ErrorKind::SomeError);
 
     let mut participant = ctx.accounts.participant.load_mut()?;
     require!(!participant.claimed, ErrorKind::SomeError);
