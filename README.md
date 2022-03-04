@@ -17,14 +17,27 @@ Example:
 ## How is the vote weight used exactly?
 
 When users call `create_participant` their vote weight at `weight_ts` is calculated,
-counting only vote weight generated from locked tokens.
-Constant lockups are treated as if they were cliffs.
+counting only vote weight generated from tokens that are guaranteed to still be locked
+at that point in time.
 
-Examples for a case where `weight_ts` is two years in the future:
-1. You have a one-year cliff or one-year constant lockup: You have no weight and can't register.
-2. You have a three-year cliff lockup: Your weight is the bonus vote weight produced by a one-year cliff lockup.
-3. You have a five-year constant lockup: Your weight is the bonus vote weight produced by a three-year cliff lockup.
-4. You have a five-year monthly vested lockup: Your weight is the bonus vote weight produced by the tokens that'll still be locked in two years, adjusted for their vesting points.
+For example, `weight_ts` could be `end_ts`, allowing anyone to register who has
+tokens that will still be locked at that time.
+
+Another option is to set `weight_ts` to a point further in the future.
+The effect is that a longer minimum lockup time is required for people to be able to
+claim a part of the distributed tokens.
+
+Concrete examples for
+```
+lockup_saturation = 5y
+lockup_bonus = 1x
+weight_ts = 2y in future
+user_token_amount = 1000
+```
+1. You have less than a two-year lockup: You have no weight and can't register.
+2. You have a three-year cliff lockup: Your weight is the bonus vote weight produced by a one-year cliff lockup: 200.
+3. You have a five-year constant lockup: Your weight is the bonus vote weight produced by a three-year cliff lockup: 600.
+4. You have a five-year monthly vested lockup: Your weight is the bonus vote weight produced by the 600 tokens that'll still be locked in two years, adjusted for their vesting points. That means 185.
 
 # License
 
