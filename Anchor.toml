@@ -1,0 +1,18 @@
+anchor_version = "0.20.1"
+solana_version = "1.9.5"
+
+[programs.localnet]
+voter_stake_registry = "2qewLEr5fxtK2Rmqeokgw4vA7HphKGUkXLF1NxWPvDEA"
+
+[programs.devnet]
+voter_stake_registry = "2qewLEr5fxtK2Rmqeokgw4vA7HphKGUkXLF1NxWPvDEA"
+
+[programs.mainnet]
+voter_stake_registry = "2qewLEr5fxtK2Rmqeokgw4vA7HphKGUkXLF1NxWPvDEA"
+
+[provider]
+cluster = "mainnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "npx ts-mocha -p ./tsconfig.json -t 1000000 tests/*.ts"
