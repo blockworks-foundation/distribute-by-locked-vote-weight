@@ -29,6 +29,7 @@ pub struct CreateParticipant<'info> {
     pub registrar: AccountLoader<'info, vsr::Registrar>,
     pub voter_authority: Signer<'info>,
 
+    #[account(mut)]
     pub payer: Signer<'info>,
 
     pub system_program: Program<'info, System>,

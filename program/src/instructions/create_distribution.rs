@@ -18,7 +18,6 @@ pub struct CreateDistribution<'info> {
     )]
     pub distribution: AccountLoader<'info, Distribution>,
     pub admin: Signer<'info>,
-    pub payer: Signer<'info>,
 
     pub registrar: AccountLoader<'info, vsr::Registrar>,
 
@@ -31,6 +30,9 @@ pub struct CreateDistribution<'info> {
         payer = payer
     )]
     pub vault: Account<'info, TokenAccount>,
+
+    #[account(mut)]
+    pub payer: Signer<'info>,
 
     pub system_program: Program<'info, System>,
     pub token_program: Program<'info, Token>,
