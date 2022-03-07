@@ -206,3 +206,73 @@ impl<'keypair> ClientInstruction for SetTimeOffsetInstruction<'keypair> {
         vec![self.admin]
     }
 }
+
+pub struct StartClaimPhaseInstruction {
+    pub distribution: Pubkey,
+}
+#[async_trait::async_trait(?Send)]
+impl ClientInstruction for StartClaimPhaseInstruction {
+    type Accounts = distribute_by_locked_vote_weight::accounts::StartClaimPhase;
+    type Instruction = distribute_by_locked_vote_weight::instruction::StartClaimPhase;
+    async fn to_instruction(
+        &self,
+        account_loader: impl ClientAccountLoader + 'async_trait,
+    ) -> (Self::Accounts, instruction::Instruction) {
+        let program_id = distribute_by_locked_vote_weight::id();
+        let instruction = Self::Instruction {};
+
+        let distribution: Distribution = account_loader.load(&self.distribution).await.unwrap();
+
+        let accounts = Self::Accounts {
+            distribution: self.distribution,
+            vault: distribution.vault,
+        };
+
+        let instruction = make_instruction(program_id, &accounts, instruction);
+        (accounts, instruction)
+    }
+
+    fn signers(&self) -> Vec<&Keypair> {
+        vec![]
+    }
+}
+
+pub struct ClaimInstruction<'keypair> {
+    pub participant: Pubkey,
+    pub voter_authority: &'keypair Keypair,
+    pub target_token: Pubkey,
+}
+#[async_trait::async_trait(?Send)]
+impl<'keypair> ClientInstruction for ClaimInstruction<'keypair> {
+    type Accounts = distribute_by_locked_vote_weight::accounts::Claim;
+    type Instruction = distribute_by_locked_vote_weight::instruction::Claim;
+    async fn to_instruction(
+        &self,
+        account_loader: impl ClientAccountLoader + 'async_trait,
+    ) -> (Self::Accounts, instruction::Instruction) {
+        let program_id = distribute_by_locked_vote_weight::id();
+        let instruction = Self::Instruction {};
+
+        let participant: Participant = account_loader.load(&self.participant).await.unwrap();
+        let distribution: Distribution = account_loader
+            .load(&participant.distribution)
+            .await
+            .unwrap();
+
+        let accounts = Self::Accounts {
+            distribution: participant.distribution,
+            participant: self.participant,
+            vault: distribution.vault,
+            target_token: self.target_token,
+            voter_authority: self.voter_authority.pubkey(),
+            token_program: Token::id(),
+        };
+
+        let instruction = make_instruction(program_id, &accounts, instruction);
+        (accounts, instruction)
+    }
+
+    fn signers(&self) -> Vec<&Keypair> {
+        vec![self.voter_authority]
+    }
+}

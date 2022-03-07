@@ -131,12 +131,32 @@ async fn test_basic() -> Result<(), TransportError> {
     .unwrap();
     let participant = accounts.participant;
 
+    assert!(send_tx(solana, StartClaimPhaseInstruction { distribution })
+        .await
+        .is_err());
+
     send_tx(
         solana,
         SetTimeOffsetInstruction {
             distribution,
             admin,
             time_offset: 1000,
+        },
+    )
+    .await
+    .unwrap();
+
+    solana.advance_by_slots(2).await;
+    send_tx(solana, StartClaimPhaseInstruction { distribution })
+        .await
+        .unwrap();
+
+    send_tx(
+        solana,
+        ClaimInstruction {
+            participant,
+            voter_authority,
+            target_token: payer_mint0_account,
         },
     )
     .await
