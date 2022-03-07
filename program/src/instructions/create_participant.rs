@@ -40,6 +40,7 @@ pub fn create_participant(ctx: Context<CreateParticipant>) -> Result<()> {
     let mut distribution = ctx.accounts.distribution.load_mut()?;
     let now_ts = distribution.clock_unix_timestamp();
     require!(now_ts <= distribution.end_ts, ErrorKind::SomeError);
+    require!(!distribution.in_claim_phase, ErrorKind::SomeError);
 
     let voter = ctx.accounts.voter.load()?;
     let registrar = ctx.accounts.registrar.load()?;

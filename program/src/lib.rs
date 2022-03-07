@@ -32,7 +32,12 @@ pub mod distribute_by_locked_vote_weight {
     pub fn start_claim_phase(ctx: Context<StartClaimPhase>) -> Result<()> {
         instructions::start_claim_phase(ctx)
     }
+
     pub fn claim(ctx: Context<Claim>) -> Result<()> {
         instructions::claim(ctx)
+    }
+
+    pub fn set_time_offset(ctx: Context<SetTimeOffset>, time_offset: i64) -> Result<()> {
+        instructions::set_time_offset(ctx, time_offset)
     }
 }
