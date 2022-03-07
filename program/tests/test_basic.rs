@@ -131,5 +131,16 @@ async fn test_basic() -> Result<(), TransportError> {
     .unwrap();
     let participant = accounts.participant;
 
+    send_tx(
+        solana,
+        SetTimeOffsetInstruction {
+            distribution,
+            admin,
+            time_offset: 1000,
+        },
+    )
+    .await
+    .unwrap();
+
     Ok(())
 }

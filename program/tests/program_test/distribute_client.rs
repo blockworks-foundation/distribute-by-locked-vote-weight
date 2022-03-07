@@ -174,3 +174,35 @@ impl<'keypair> ClientInstruction for CreateParticipantInstruction<'keypair> {
         vec![self.payer, self.voter_authority]
     }
 }
+
+pub struct SetTimeOffsetInstruction<'keypair> {
+    pub distribution: Pubkey,
+    pub admin: &'keypair Keypair,
+    pub time_offset: i64,
+}
+#[async_trait::async_trait(?Send)]
+impl<'keypair> ClientInstruction for SetTimeOffsetInstruction<'keypair> {
+    type Accounts = distribute_by_locked_vote_weight::accounts::SetTimeOffset;
+    type Instruction = distribute_by_locked_vote_weight::instruction::SetTimeOffset;
+    async fn to_instruction(
+        &self,
+        _account_loader: impl ClientAccountLoader + 'async_trait,
+    ) -> (Self::Accounts, instruction::Instruction) {
+        let program_id = distribute_by_locked_vote_weight::id();
+        let instruction = Self::Instruction {
+            time_offset: self.time_offset,
+        };
+
+        let accounts = Self::Accounts {
+            distribution: self.distribution,
+            admin: self.admin.pubkey(),
+        };
+
+        let instruction = make_instruction(program_id, &accounts, instruction);
+        (accounts, instruction)
+    }
+
+    fn signers(&self) -> Vec<&Keypair> {
+        vec![self.admin]
+    }
+}
