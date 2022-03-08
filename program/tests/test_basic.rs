@@ -129,13 +129,16 @@ async fn test_basic() -> Result<(), TransportError> {
         CreateParticipantInstruction {
             distribution,
             voter,
-            voter_authority,
             payer,
         },
     )
     .await
     .unwrap();
     let participant = accounts.participant;
+
+    send_tx(solana, UpdateParticipantInstruction { participant })
+        .await
+        .unwrap();
 
     assert!(send_tx(solana, StartClaimPhaseInstruction { distribution })
         .await

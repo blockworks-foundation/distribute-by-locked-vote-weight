@@ -4,6 +4,7 @@ use anchor_lang::prelude::*;
 #[account(zero_copy)]
 pub struct Participant {
     pub distribution: Pubkey,
+    pub voter: Pubkey,
     pub voter_authority: Pubkey,
     pub weight: u64,
     pub claimed: bool,

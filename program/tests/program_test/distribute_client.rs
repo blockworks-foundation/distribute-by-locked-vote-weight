@@ -130,7 +130,6 @@ impl<'keypair> ClientInstruction for CreateDistributionInstruction<'keypair> {
 pub struct CreateParticipantInstruction<'keypair> {
     pub distribution: Pubkey,
     pub voter: Pubkey,
-    pub voter_authority: &'keypair Keypair,
     pub payer: &'keypair Keypair,
 }
 #[async_trait::async_trait(?Send)]
@@ -160,7 +159,6 @@ impl<'keypair> ClientInstruction for CreateParticipantInstruction<'keypair> {
             participant,
             voter: self.voter,
             registrar: distribution.registrar,
-            voter_authority: self.voter_authority.pubkey(),
             payer: self.payer.pubkey(),
             system_program: System::id(),
             rent: sysvar::rent::Rent::id(),
@@ -171,7 +169,43 @@ impl<'keypair> ClientInstruction for CreateParticipantInstruction<'keypair> {
     }
 
     fn signers(&self) -> Vec<&Keypair> {
-        vec![self.payer, self.voter_authority]
+        vec![self.payer]
+    }
+}
+
+pub struct UpdateParticipantInstruction {
+    pub participant: Pubkey,
+}
+#[async_trait::async_trait(?Send)]
+impl ClientInstruction for UpdateParticipantInstruction {
+    type Accounts = distribute_by_locked_vote_weight::accounts::UpdateParticipant;
+    type Instruction = distribute_by_locked_vote_weight::instruction::UpdateParticipant;
+    async fn to_instruction(
+        &self,
+        account_loader: impl ClientAccountLoader + 'async_trait,
+    ) -> (Self::Accounts, instruction::Instruction) {
+        let program_id = distribute_by_locked_vote_weight::id();
+        let instruction = Self::Instruction {};
+
+        let participant: Participant = account_loader.load(&self.participant).await.unwrap();
+        let distribution: Distribution = account_loader
+            .load(&participant.distribution)
+            .await
+            .unwrap();
+
+        let accounts = Self::Accounts {
+            distribution: participant.distribution,
+            participant: self.participant,
+            voter: participant.voter,
+            registrar: distribution.registrar,
+        };
+
+        let instruction = make_instruction(program_id, &accounts, instruction);
+        (accounts, instruction)
+    }
+
+    fn signers(&self) -> Vec<&Keypair> {
+        vec![]
     }
 }
 
