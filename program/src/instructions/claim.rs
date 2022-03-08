@@ -46,7 +46,7 @@ impl<'info> Claim<'info> {
 
 pub fn claim(ctx: Context<Claim>) -> Result<()> {
     let distribution = ctx.accounts.distribution.load()?;
-    require!(distribution.in_claim_phase, ErrorKind::SomeError);
+    require!(distribution.in_claim_phase, ErrorKind::NotInClaimPhase);
 
     let participant = ctx.accounts.participant.load()?;
 

@@ -17,8 +17,14 @@ pub struct StartClaimPhase<'info> {
 pub fn start_claim_phase(ctx: Context<StartClaimPhase>) -> Result<()> {
     let mut distribution = ctx.accounts.distribution.load_mut()?;
     let now_ts = distribution.clock_unix_timestamp();
-    require!(now_ts >= distribution.end_ts, ErrorKind::SomeError);
-    require!(!distribution.in_claim_phase, ErrorKind::SomeError);
+    require!(
+        now_ts >= distribution.end_ts,
+        ErrorKind::TooEarlyForClaimPhase
+    );
+    require!(
+        !distribution.in_claim_phase,
+        ErrorKind::ClaimPhaseAlreadyStarted
+    );
 
     distribution.in_claim_phase = true;
     distribution.total_amount_to_distribute = ctx.accounts.vault.amount;

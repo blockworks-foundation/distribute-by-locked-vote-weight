@@ -37,14 +37,17 @@ pub struct CreateParticipant<'info> {
 pub fn create_participant(ctx: Context<CreateParticipant>) -> Result<()> {
     let mut distribution = ctx.accounts.distribution.load_mut()?;
     let now_ts = distribution.clock_unix_timestamp();
-    require!(now_ts <= distribution.end_ts, ErrorKind::SomeError);
-    require!(!distribution.in_claim_phase, ErrorKind::SomeError);
+    require!(now_ts <= distribution.end_ts, ErrorKind::TooLateToRegister);
+    require!(!distribution.in_claim_phase, ErrorKind::TooLateToRegister);
 
     let voter = ctx.accounts.voter.load()?;
     let registrar = ctx.accounts.registrar.load()?;
     // TODO: compute the weight at distribution.weight_ts, and get only locked-token contributions
-    let weight = voter.weight(&registrar).map_err(|_| ErrorKind::SomeError)?;
-    require!(weight > 0, ErrorKind::SomeError);
+    let weight = voter.weight(&registrar).map_err(|err| {
+        msg!("vsr error: {}", err);
+        ErrorKind::VoterStakeRegistryError
+    })?;
+    require!(weight > 0, ErrorKind::NoLockedVoteWeight);
 
     let mut participant = ctx.accounts.participant.load_init()?;
     *participant = Participant {
