@@ -1,7 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::sysvar::{self, SysvarId};
-use anchor_spl::token::{Token, TokenAccount};
-use solana_program::instruction::Instruction;
+use anchor_spl::token::Token;
 use solana_sdk::instruction;
 use solana_sdk::signature::{Keypair, Signer};
 use solana_sdk::transport::TransportError;
