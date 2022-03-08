@@ -102,6 +102,29 @@ impl SolanaCookie {
     }
 
     #[allow(dead_code)]
+    pub async fn transfer_token(
+        &self,
+        source: Pubkey,
+        authority: &Keypair,
+        destination: Pubkey,
+        amount: u64,
+    ) {
+        let instructions = [spl_token::instruction::transfer(
+            &spl_token::id(),
+            &source,
+            &destination,
+            &authority.pubkey(),
+            &vec![],
+            amount,
+        )
+        .unwrap()];
+
+        self.process_transaction(&instructions, Some(&[authority]))
+            .await
+            .unwrap();
+    }
+
+    #[allow(dead_code)]
     pub async fn get_account_data(&self, address: Pubkey) -> Option<Vec<u8>> {
         Some(
             self.context

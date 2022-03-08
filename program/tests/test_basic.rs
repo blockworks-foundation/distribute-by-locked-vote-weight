@@ -98,6 +98,7 @@ async fn test_basic() -> Result<(), TransportError> {
     let payer = &context.users[0].key;
     let mint0 = &context.mints[0];
     let payer_mint0_account = context.users[0].token_accounts[0];
+    let start_balance = solana.token_account_balance(payer_mint0_account).await;
 
     //
     // SETUP: distribution and participant
@@ -117,6 +118,11 @@ async fn test_basic() -> Result<(), TransportError> {
     .await
     .unwrap();
     let distribution = accounts.distribution;
+    let vault = accounts.vault;
+
+    solana
+        .transfer_token(payer_mint0_account, payer, vault, 10_000)
+        .await;
 
     let accounts = send_tx(
         solana,
@@ -161,6 +167,9 @@ async fn test_basic() -> Result<(), TransportError> {
     )
     .await
     .unwrap();
+
+    let end_balance = solana.token_account_balance(payer_mint0_account).await;
+    assert_eq!(start_balance, end_balance);
 
     Ok(())
 }
