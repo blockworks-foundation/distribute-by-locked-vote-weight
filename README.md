@@ -11,7 +11,8 @@ Example:
   - a specific voter-stake-registry registrar
 - deposit tokens to the ATA of the distribution
 - anyone with a voter account on the voter-stake-registry registrar can register with the distribution by calling `create_participant`
-- when end_ts has been reachend, someone calls `start_claim_phase` permissionlessly
+- if participants lock up more tokens before `end_ts`, they can call `update_participant` to register their new weight
+- when `end_ts` is reached, someone calls `start_claim_phase` permissionlessly
 - anyone who's previously registered can `claim` their share of the deposited tokens
 
 ## How is the vote weight used exactly?
