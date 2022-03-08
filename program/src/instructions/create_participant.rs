@@ -54,7 +54,10 @@ pub fn create_participant(ctx: Context<CreateParticipant>) -> Result<()> {
         weight,
         claimed: false,
     };
-    distribution.participant_total_weight += weight;
+    distribution.participant_total_weight = distribution
+        .participant_total_weight
+        .checked_add(weight)
+        .unwrap();
 
     Ok(())
 }

@@ -112,11 +112,7 @@ impl TestContext {
             processor!(distribute_by_locked_vote_weight::entry),
         );
 
-        test.add_program(
-            "voter_stake_registry",
-            voter_stake_registry::id(),
-            None,
-        );
+        test.add_program("voter_stake_registry", voter_stake_registry::id(), None);
 
         // intentionally set to half the limit, to catch potential problems early
         test.set_compute_max_units(100000);
