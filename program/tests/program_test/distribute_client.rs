@@ -274,6 +274,7 @@ pub struct ClaimInstruction<'keypair> {
     pub participant: Pubkey,
     pub voter_authority: &'keypair Keypair,
     pub target_token: Pubkey,
+    pub sol_destination: Pubkey,
 }
 #[async_trait::async_trait(?Send)]
 impl<'keypair> ClientInstruction for ClaimInstruction<'keypair> {
@@ -298,6 +299,7 @@ impl<'keypair> ClientInstruction for ClaimInstruction<'keypair> {
             vault: distribution.vault,
             target_token: self.target_token,
             voter_authority: self.voter_authority.pubkey(),
+            sol_destination: self.sol_destination,
             token_program: Token::id(),
         };
 

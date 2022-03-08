@@ -14,6 +14,7 @@ pub struct Claim<'info> {
         mut,
         has_one = distribution,
         has_one = voter_authority,
+        close = sol_destination,
     )]
     pub participant: AccountLoader<'info, Participant>,
 
@@ -24,6 +25,9 @@ pub struct Claim<'info> {
     pub target_token: Box<Account<'info, TokenAccount>>,
 
     pub voter_authority: Signer<'info>,
+
+    #[account(mut)]
+    pub sol_destination: UncheckedAccount<'info>,
 
     pub token_program: Program<'info, Token>,
 }
@@ -44,9 +48,7 @@ pub fn claim(ctx: Context<Claim>) -> Result<()> {
     let distribution = ctx.accounts.distribution.load()?;
     require!(distribution.in_claim_phase, ErrorKind::SomeError);
 
-    let mut participant = ctx.accounts.participant.load_mut()?;
-    require!(!participant.claimed, ErrorKind::SomeError);
-    participant.claimed = true;
+    let participant = ctx.accounts.participant.load()?;
 
     // TODO: check rounding
     let amount = distribution.total_amount_to_distribute * participant.weight
@@ -57,8 +59,6 @@ pub fn claim(ctx: Context<Claim>) -> Result<()> {
             .with_signer(&[distribution_seeds!(distribution)]),
         amount,
     )?;
-
-    // TODO: Close the participant account
 
     Ok(())
 }

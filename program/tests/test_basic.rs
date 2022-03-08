@@ -166,10 +166,14 @@ async fn test_basic() -> Result<(), TransportError> {
             participant,
             voter_authority,
             target_token: payer_mint0_account,
+            sol_destination: payer.pubkey(),
         },
     )
     .await
     .unwrap();
+
+    // participant account is closed
+    assert!(solana.get_account_data(participant).await.is_none());
 
     let end_balance = solana.token_account_balance(payer_mint0_account).await;
     assert_eq!(start_balance, end_balance);

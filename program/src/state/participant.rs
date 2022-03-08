@@ -7,7 +7,6 @@ pub struct Participant {
     pub voter: Pubkey,
     pub voter_authority: Pubkey,
     pub weight: u64,
-    pub claimed: bool,
 }
 // const_assert!(std::mem::size_of::<Voter>() == 2 * 32 + 32 * 80 + 2 + 94);
 // const_assert!(std::mem::size_of::<Voter>() % 8 == 0);
