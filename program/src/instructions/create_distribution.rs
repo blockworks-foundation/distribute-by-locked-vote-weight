@@ -70,6 +70,7 @@ pub fn create_distribution(
         in_claim_phase: false,
         total_amount_to_distribute: 0,
         time_offset: 0,
+        reserved: [0; 38],
     };
 
     Ok(())

@@ -6,8 +6,8 @@ mod error;
 mod instructions;
 pub mod state;
 
-//#[macro_use]
-//extern crate static_assertions;
+#[macro_use]
+extern crate static_assertions;
 
 // The program address.
 declare_id!("2qewLEr5fxtK2Rmqeokgw4vA7HphKGUkXLF1NxWPvDEA");

@@ -9,8 +9,6 @@ pub struct Distribution {
     pub vault: Pubkey,
     pub index: u64,
 
-    pub bump: u8,
-
     // participants can only be created before this time
     // claims can only be made after this time
     pub end_ts: u64,
@@ -22,14 +20,18 @@ pub struct Distribution {
 
     pub participant_total_weight: u64,
 
-    pub in_claim_phase: bool,
     pub total_amount_to_distribute: u64,
 
     /// Debug only: time offset, to allow tests to move forward in time.
     pub time_offset: i64,
+
+    pub bump: u8,
+    pub in_claim_phase: bool,
+
+    pub reserved: [u8; 38],
 }
-// const_assert!(std::mem::size_of::<Registrar>() == 5 * 32 + 4 * 152 + 8 + 1 + 95);
-// const_assert!(std::mem::size_of::<Registrar>() % 8 == 0);
+const_assert!(std::mem::size_of::<Distribution>() == 4 * 32 + 6 * 8 + 2 + 38);
+const_assert!(std::mem::size_of::<Distribution>() % 8 == 0);
 
 impl Distribution {
     pub fn clock_unix_timestamp(&self) -> u64 {
