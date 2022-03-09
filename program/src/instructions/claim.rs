@@ -50,9 +50,16 @@ pub fn claim(ctx: Context<Claim>) -> Result<()> {
 
     let participant = ctx.accounts.participant.load()?;
 
-    // TODO: check rounding
-    let amount = distribution.total_amount_to_distribute * participant.weight
-        / distribution.participant_total_weight;
+    // This rounds down, meaning not all tokens may be fully distributed.
+    let amount = u64::try_from(
+        (distribution.total_amount_to_distribute as u128)
+            .checked_mul(participant.weight as u128)
+            .unwrap()
+            .checked_div(distribution.participant_total_weight)
+            .unwrap(),
+    )
+    .unwrap();
+
     token::transfer(
         ctx.accounts
             .transfer_ctx()

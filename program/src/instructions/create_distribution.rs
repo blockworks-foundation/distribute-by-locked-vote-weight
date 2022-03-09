@@ -46,7 +46,10 @@ pub fn create_distribution(
     registration_end_ts: u64,
     weight_ts: u64,
 ) -> Result<()> {
-    require!(registration_end_ts <= weight_ts, ErrorKind::WeightNotDuringRegistration);
+    require!(
+        registration_end_ts <= weight_ts,
+        ErrorKind::WeightNotDuringRegistration
+    );
 
     let bump = Pubkey::find_program_address(
         &[

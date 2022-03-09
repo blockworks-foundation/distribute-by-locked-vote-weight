@@ -19,7 +19,7 @@ pub struct Distribution {
     pub weight_ts: u64,
 
     /// sum of the weights from all participants
-    pub participant_total_weight: u64,
+    pub participant_total_weight: u128,
 
     /// the amount of tokens seen in the distribution vault when the claim phase started
     pub total_amount_to_distribute: u64,
@@ -34,7 +34,7 @@ pub struct Distribution {
 
     pub reserved: [u8; 38],
 }
-const_assert!(std::mem::size_of::<Distribution>() == 4 * 32 + 6 * 8 + 2 + 38);
+const_assert!(std::mem::size_of::<Distribution>() == 4 * 32 + 7 * 8 + 2 + 38);
 const_assert!(std::mem::size_of::<Distribution>() % 8 == 0);
 
 impl Distribution {

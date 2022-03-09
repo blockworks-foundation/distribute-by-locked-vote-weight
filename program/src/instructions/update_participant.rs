@@ -28,7 +28,10 @@ pub struct UpdateParticipant<'info> {
 pub fn update_participant(ctx: Context<UpdateParticipant>) -> Result<()> {
     let mut distribution = ctx.accounts.distribution.load_mut()?;
     let now_ts = distribution.clock_unix_timestamp();
-    require!(now_ts < distribution.registration_end_ts, ErrorKind::TooLateToRegister);
+    require!(
+        now_ts < distribution.registration_end_ts,
+        ErrorKind::TooLateToRegister
+    );
     require!(!distribution.in_claim_phase, ErrorKind::TooLateToRegister);
 
     // compute new weight
@@ -51,11 +54,11 @@ pub fn update_participant(ctx: Context<UpdateParticipant>) -> Result<()> {
     );
     distribution.participant_total_weight = distribution
         .participant_total_weight
-        .saturating_sub(participant.weight);
+        .saturating_sub(participant.weight.into());
     participant.weight = weight;
     distribution.participant_total_weight = distribution
         .participant_total_weight
-        .checked_add(weight)
+        .checked_add(weight.into())
         .unwrap();
 
     Ok(())
