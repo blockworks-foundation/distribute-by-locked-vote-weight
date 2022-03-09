@@ -45,8 +45,7 @@ pub fn create_participant(ctx: Context<CreateParticipant>) -> Result<()> {
 
     let voter = ctx.accounts.voter.load()?;
     let registrar = ctx.accounts.registrar.load()?;
-    // TODO: compute the weight at distribution.weight_ts, and get only locked-token contributions
-    let weight = voter.weight(&registrar).map_err(|err| {
+    let weight = voter.weight_locked_guaranteed(&registrar, now_ts as i64, distribution.weight_ts as i64).map_err(|err| {
         msg!("vsr error: {}", err);
         ErrorKind::VoterStakeRegistryError
     })?;

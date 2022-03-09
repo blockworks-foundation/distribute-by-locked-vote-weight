@@ -11,15 +11,18 @@ use solana_sdk::{
 use spl_token::{state::*, *};
 use std::str::FromStr;
 
+pub use client::*;
 pub use cookies::*;
 pub use distribute_client::*;
 pub use solana::*;
 pub use utils::*;
 
+pub mod client;
 pub mod cookies;
 pub mod distribute_client;
 pub mod solana;
 pub mod utils;
+pub mod vsr_client;
 
 lazy_static::lazy_static! {
     pub static ref MANGO_MINT_PK: Pubkey = Pubkey::from_str("MangoCzJ36AjZyKwVj3VnYU4GTonjfVEnJmvvWaxLac").unwrap();
@@ -85,6 +88,28 @@ pub struct TestContext {
 #[derive(Default)]
 pub struct TestConfig {
     pub accounts: Vec<(Pubkey, solana_sdk::account::Account)>,
+}
+
+impl TestConfig {
+    pub fn add_packable_account<T: Pack>(&mut self, pubkey: Pubkey, data: T, owner: Pubkey) {
+        let mut account =
+            solana_sdk::account::Account::new(u32::MAX as u64, T::get_packed_len(), &owner);
+        data.pack_into_slice(&mut account.data);
+        self.accounts.push((pubkey, account));
+    }
+
+    pub fn add_anchor_account<T: bytemuck::Pod + anchor_lang::Discriminator>(
+        &mut self,
+        pubkey: Pubkey,
+        data: T,
+        owner: Pubkey,
+    ) {
+        let mut bytes = T::discriminator().to_vec();
+        bytes.append(&mut bytemuck::bytes_of(&data).to_vec());
+        let mut account = solana_sdk::account::Account::new(u32::MAX as u64, bytes.len(), &owner);
+        account.data = bytes;
+        self.accounts.push((pubkey, account));
+    }
 }
 
 impl TestContext {
