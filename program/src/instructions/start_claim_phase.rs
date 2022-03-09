@@ -18,7 +18,7 @@ pub fn start_claim_phase(ctx: Context<StartClaimPhase>) -> Result<()> {
     let mut distribution = ctx.accounts.distribution.load_mut()?;
     let now_ts = distribution.clock_unix_timestamp();
     require!(
-        now_ts >= distribution.end_ts,
+        now_ts >= distribution.registration_end_ts,
         ErrorKind::TooEarlyForClaimPhase
     );
     require!(

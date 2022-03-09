@@ -26,4 +26,7 @@ pub enum ErrorKind {
     // 6007 / 0x1777
     #[msg("weight must not decrease on update, please report this error")]
     WeightMustNotDecrease,
+    // 6008 / 0x1778
+    #[msg("weight timestamp must not lie within registration phase")]
+    WeightNotDuringRegistration,
 }

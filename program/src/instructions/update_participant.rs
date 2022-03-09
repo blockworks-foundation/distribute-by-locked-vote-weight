@@ -28,7 +28,7 @@ pub struct UpdateParticipant<'info> {
 pub fn update_participant(ctx: Context<UpdateParticipant>) -> Result<()> {
     let mut distribution = ctx.accounts.distribution.load_mut()?;
     let now_ts = distribution.clock_unix_timestamp();
-    require!(now_ts <= distribution.end_ts, ErrorKind::TooLateToRegister);
+    require!(now_ts < distribution.registration_end_ts, ErrorKind::TooLateToRegister);
     require!(!distribution.in_claim_phase, ErrorKind::TooLateToRegister);
 
     // compute new weight

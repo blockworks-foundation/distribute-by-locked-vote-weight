@@ -43,9 +43,11 @@ pub struct CreateDistribution<'info> {
 pub fn create_distribution(
     ctx: Context<CreateDistribution>,
     index: u64,
-    end_ts: u64,
+    registration_end_ts: u64,
     weight_ts: u64,
 ) -> Result<()> {
+    require!(registration_end_ts <= weight_ts, ErrorKind::WeightNotDuringRegistration);
+
     let bump = Pubkey::find_program_address(
         &[
             b"distribution".as_ref(),
@@ -65,7 +67,7 @@ pub fn create_distribution(
         index,
         bump,
         participant_total_weight: 0,
-        end_ts,
+        registration_end_ts,
         weight_ts,
         in_claim_phase: false,
         total_amount_to_distribute: 0,

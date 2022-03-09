@@ -9,23 +9,27 @@ pub struct Distribution {
     pub vault: Pubkey,
     pub index: u64,
 
-    // participants can only be created before this time
-    // claims can only be made after this time
-    pub end_ts: u64,
+    /// participants can only be created before this time
+    /// StartClaimPhase can only be called after this time
+    pub registration_end_ts: u64,
 
-    // the time for which the vote weight from locked tokens is computed
-    // if this is one year in the future, then only lockups that last for
-    // at least one year can contribute
+    /// the time for which the vote weight from locked tokens is computed
+    /// if this is one year in the future, then only lockups that last for
+    /// at least one year can contribute
     pub weight_ts: u64,
 
+    /// sum of the weights from all participants
     pub participant_total_weight: u64,
 
+    /// the amount of tokens seen in the distribution vault when the claim phase started
     pub total_amount_to_distribute: u64,
 
     /// Debug only: time offset, to allow tests to move forward in time.
     pub time_offset: i64,
 
     pub bump: u8,
+
+    /// Did someone call StartClaimPhase after registration_end_ts?
     pub in_claim_phase: bool,
 
     pub reserved: [u8; 38],
