@@ -12,7 +12,7 @@ pub struct Distribution {
     pub index: u64,
 
     /// participants can only be created before this time
-    /// StartClaimPhase can only be called after this time
+    /// Claim can only be called after this time
     pub registration_end_ts: u64,
 
     /// the time for which the vote weight from locked tokens is computed
@@ -34,12 +34,9 @@ pub struct Distribution {
 
     pub bump: u8,
 
-    /// Did someone call StartClaimPhase after registration_end_ts?
-    pub in_claim_phase: bool,
-
-    pub reserved: [u8; 38],
+    pub reserved: [u8; 39],
 }
-const_assert!(std::mem::size_of::<Distribution>() == 4 * 32 + 7 * 8 + 2 * 4 + 2 + 38);
+const_assert!(std::mem::size_of::<Distribution>() == 4 * 32 + 7 * 8 + 2 * 4 + 1 + 39);
 const_assert!(std::mem::size_of::<Distribution>() % 8 == 0);
 
 impl Distribution {
@@ -59,6 +56,14 @@ impl Distribution {
                 msg!("vsr error: {}", err);
                 ErrorKind::VoterStakeRegistryError
             })?)
+    }
+
+    pub fn in_registration_phase(&self) -> bool {
+        self.clock_unix_timestamp() < self.registration_end_ts
+    }
+
+    pub fn in_claim_phase(&self) -> bool {
+        !self.in_registration_phase()
     }
 }
 

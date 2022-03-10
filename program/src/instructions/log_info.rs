@@ -32,12 +32,11 @@ pub struct LogInfo<'info> {
 
 pub fn log_info(ctx: Context<LogInfo>) -> Result<()> {
     let distribution = ctx.accounts.distribution.load()?;
-    let now_ts = distribution.clock_unix_timestamp();
-    let can_register = now_ts < distribution.registration_end_ts;
+    let in_claim_phase = distribution.in_claim_phase();
 
     let voter = ctx.accounts.voter.load()?;
     let registrar = ctx.accounts.registrar.load()?;
-    let usable_weight = if can_register {
+    let usable_weight = if distribution.in_registration_phase() {
         Some(distribution.voter_weight(&registrar, &voter)?)
     } else {
         None
@@ -50,8 +49,7 @@ pub fn log_info(ctx: Context<LogInfo>) -> Result<()> {
     emit!(Info {
         participant_total_weight: distribution.participant_total_weight,
         distribution_amount: ctx.accounts.vault.amount,
-        can_start_claim_phase: !distribution.in_claim_phase && !can_register,
-        in_claim_phase: distribution.in_claim_phase,
+        in_claim_phase,
         usable_weight,
         registered_weight,
     });

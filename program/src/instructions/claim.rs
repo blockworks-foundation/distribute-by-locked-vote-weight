@@ -52,12 +52,16 @@ impl<'info> Claim<'info> {
 pub fn claim(ctx: Context<Claim>) -> Result<()> {
     {
         let mut distribution = ctx.accounts.distribution.load_mut()?;
+        require!(distribution.in_claim_phase(), ErrorKind::NotInClaimPhase);
+        // If this is the first Claim, take a snapshot of how many tokens
+        // are in the vault.
+        if distribution.claim_count == 0 {
+            distribution.total_amount_to_distribute = ctx.accounts.vault.amount;
+        }
         distribution.claim_count = distribution.claim_count.checked_add(1).unwrap();
     }
 
     let distribution = ctx.accounts.distribution.load()?;
-    require!(distribution.in_claim_phase, ErrorKind::NotInClaimPhase);
-
     let participant = ctx.accounts.participant.load()?;
 
     // This rounds down, meaning not all tokens may be fully distributed.

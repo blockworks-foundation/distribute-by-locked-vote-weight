@@ -93,7 +93,6 @@ async fn test_full_lifecycle() -> Result<(), TransportError> {
     let info_event = get_info(solana, distribution, voter0.pubkey).await;
     assert_eq!(info_event.participant_total_weight, 0);
     assert_eq!(info_event.distribution_amount, distribution_amount);
-    assert!(!info_event.can_start_claim_phase);
     assert!(!info_event.in_claim_phase);
     // -1 is due to rounding down as end_ts > now_ts
     let weight0 = voter0.locked_amount * 12 / 60 - 1;
@@ -140,18 +139,26 @@ async fn test_full_lifecycle() -> Result<(), TransportError> {
         (weight0 + weight1) as u128
     );
     assert_eq!(info_event.distribution_amount, distribution_amount);
-    assert!(!info_event.can_start_claim_phase);
     assert!(!info_event.in_claim_phase);
     assert_eq!(info_event.usable_weight, Some(weight0));
     assert_eq!(info_event.registered_weight, Some(weight0));
 
-    //
-    // STEP 1: go to claim phase
-    //
-    assert!(send_tx(solana, StartClaimPhaseInstruction { distribution })
-        .await
-        .is_err());
+    // claiming is impossible now
+    assert!(send_tx(
+        solana,
+        ClaimInstruction {
+            participant: participant0,
+            voter_authority: &voter0.authority,
+            target_token: payer_mint0_account,
+            sol_destination: payer.pubkey(),
+        },
+    )
+    .await
+    .is_err());
 
+    //
+    // STEP 1: advance time
+    //
     send_tx(
         solana,
         SetTimeOffsetInstruction {
@@ -165,19 +172,18 @@ async fn test_full_lifecycle() -> Result<(), TransportError> {
 
     // Check that it's reflected in info
     let info_event = get_info(solana, distribution, voter0.pubkey).await;
-    assert!(info_event.can_start_claim_phase);
-    assert!(!info_event.in_claim_phase);
+    assert!(info_event.in_claim_phase);
     assert_eq!(info_event.usable_weight, None);
 
-    solana.advance_by_slots(1).await;
-    send_tx(solana, StartClaimPhaseInstruction { distribution })
-        .await
-        .unwrap();
-
-    // Check that it's reflected in info
-    let info_event = get_info(solana, distribution, voter0.pubkey).await;
-    assert!(!info_event.can_start_claim_phase);
-    assert!(info_event.in_claim_phase);
+    // updating is impossible now
+    assert!(send_tx(
+        solana,
+        UpdateParticipantInstruction {
+            participant: participant0
+        }
+    )
+    .await
+    .is_err());
 
     //
     // STEP 3: claim

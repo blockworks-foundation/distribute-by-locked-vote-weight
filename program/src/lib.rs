@@ -34,10 +34,6 @@ pub mod distribute_by_locked_vote_weight {
         instructions::update_participant(ctx)
     }
 
-    pub fn start_claim_phase(ctx: Context<StartClaimPhase>) -> Result<()> {
-        instructions::start_claim_phase(ctx)
-    }
-
     pub fn claim(ctx: Context<Claim>) -> Result<()> {
         instructions::claim(ctx)
     }

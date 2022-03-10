@@ -7,8 +7,6 @@ pub struct Info {
     pub participant_total_weight: u128,
     /// The current distribution vault balance
     pub distribution_amount: u64,
-    /// Can the claim phase be started?
-    pub can_start_claim_phase: bool,
     /// Can claims be made?
     pub in_claim_phase: bool,
 

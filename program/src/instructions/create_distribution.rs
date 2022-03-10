@@ -12,7 +12,7 @@ use voter_stake_registry::state as vsr;
 /// doing a normal spl_token transfer to it.
 ///
 /// `registration_end_ts`: Participants must register before this time.
-///     when it is reached, StartClaimPhase can be called.
+///     when it is reached, Claim can be called.
 /// `weight_ts`: The time at which the locked token vote weight is evaluated.
 ///     Must be >= registration_end_ts.
 #[derive(Accounts)]
@@ -81,12 +81,11 @@ pub fn create_distribution(
         participant_total_weight: 0,
         registration_end_ts,
         weight_ts,
-        in_claim_phase: false,
         total_amount_to_distribute: 0,
         time_offset: 0,
         participant_count: 0,
         claim_count: 0,
-        reserved: [0; 38],
+        reserved: [0; 39],
     };
 
     Ok(())
