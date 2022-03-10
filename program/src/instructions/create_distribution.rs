@@ -6,6 +6,15 @@ use anchor_spl::token::{Mint, Token, TokenAccount};
 use std::mem::size_of;
 use voter_stake_registry::state as vsr;
 
+/// Create a new distribution
+///
+/// After creation, the distribution's vault can be funded with tokens by
+/// doing a normal spl_token transfer to it.
+///
+/// `registration_end_ts`: Participants must register before this time.
+///     when it is reached, StartClaimPhase can be called.
+/// `weight_ts`: The time at which the locked token vote weight is evaluated.
+///     Must be >= registration_end_ts.
 #[derive(Accounts)]
 #[instruction(index: u64)]
 pub struct CreateDistribution<'info> {

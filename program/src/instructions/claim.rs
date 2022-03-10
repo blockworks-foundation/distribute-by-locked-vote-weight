@@ -3,6 +3,10 @@ use crate::state::*;
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Token, TokenAccount};
 
+/// Claims a participants share of the distribution's vault by transfering
+/// it to a target_token account.
+///
+/// This also closes the participant account.
 #[derive(Accounts)]
 pub struct Claim<'info> {
     #[account(

@@ -3,6 +3,10 @@ use crate::state::*;
 use anchor_lang::prelude::*;
 use voter_stake_registry::state as vsr;
 
+/// Updates the weight associated with a participant.
+///
+/// When a voter locks up more tokens, their weight will increase. Call this to
+/// let the distribution and participant accounts know about the update.
 #[derive(Accounts)]
 pub struct UpdateParticipant<'info> {
     #[account(
@@ -37,12 +41,7 @@ pub fn update_participant(ctx: Context<UpdateParticipant>) -> Result<()> {
     // compute new weight
     let voter = ctx.accounts.voter.load()?;
     let registrar = ctx.accounts.registrar.load()?;
-    let weight = voter
-        .weight_locked_guaranteed(&registrar, now_ts as i64, distribution.weight_ts as i64)
-        .map_err(|err| {
-            msg!("vsr error: {}", err);
-            ErrorKind::VoterStakeRegistryError
-        })?;
+    let weight = distribution.voter_weight(&registrar, &voter)?;
     require!(weight > 0, ErrorKind::NoLockedVoteWeight);
 
     // unregister old weight and set the new one

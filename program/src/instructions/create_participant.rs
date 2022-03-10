@@ -4,6 +4,11 @@ use anchor_lang::prelude::*;
 use std::mem::size_of;
 use voter_stake_registry::state as vsr;
 
+/// Creates a participant for a distribution, based on their voter account.
+///
+/// Having a participant account means that Claim can be called when the claim
+/// phase has started. Use UpdateParticipant if the voter's weight increases and
+/// you want to update the value stored in the participant account.
 #[derive(Accounts)]
 pub struct CreateParticipant<'info> {
     #[account(
@@ -45,12 +50,7 @@ pub fn create_participant(ctx: Context<CreateParticipant>) -> Result<()> {
 
     let voter = ctx.accounts.voter.load()?;
     let registrar = ctx.accounts.registrar.load()?;
-    let weight = voter
-        .weight_locked_guaranteed(&registrar, now_ts as i64, distribution.weight_ts as i64)
-        .map_err(|err| {
-            msg!("vsr error: {}", err);
-            ErrorKind::VoterStakeRegistryError
-        })?;
+    let weight = distribution.voter_weight(&registrar, &voter)?;
     require!(weight > 0, ErrorKind::NoLockedVoteWeight);
 
     let mut participant = ctx.accounts.participant.load_init()?;

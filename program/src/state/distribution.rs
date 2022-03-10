@@ -1,4 +1,6 @@
+use crate::error::*;
 use anchor_lang::prelude::*;
+use voter_stake_registry::state as vsr;
 
 /// Instance of a voting rights distributor.
 #[account(zero_copy)]
@@ -47,6 +49,16 @@ impl Distribution {
             .unix_timestamp
             .checked_add(self.time_offset)
             .unwrap() as u64
+    }
+
+    pub fn voter_weight(&self, registrar: &vsr::Registrar, voter: &vsr::Voter) -> Result<u64> {
+        let now_ts = self.clock_unix_timestamp() as i64;
+        Ok(voter
+            .weight_locked_guaranteed(&registrar, now_ts, self.weight_ts as i64)
+            .map_err(|err| {
+                msg!("vsr error: {}", err);
+                ErrorKind::VoterStakeRegistryError
+            })?)
     }
 }
 

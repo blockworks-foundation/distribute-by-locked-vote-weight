@@ -13,7 +13,7 @@ Example:
 - anyone with a voter account on the voter-stake-registry registrar can register with the distribution by calling `create_participant`
 - if participants lock up more tokens before `end_ts`, they can call `update_participant` to register their new weight
 - when `end_ts` is reached, someone calls `start_claim_phase` permissionlessly
-- anyone who's previously registered can `claim` their share of the deposited tokens
+- anyone who's previously registered can `claim` their share of the deposited tokens, closing their participant account
 
 ## How is the vote weight used exactly?
 

@@ -5,6 +5,7 @@ use anchor_lang::prelude::*;
 use anchor_spl::token::TokenAccount;
 use voter_stake_registry::state as vsr;
 
+/// Logs an Info event. Used for getting status information in uis.
 #[derive(Accounts)]
 pub struct LogInfo<'info> {
     #[account(
@@ -37,14 +38,7 @@ pub fn log_info(ctx: Context<LogInfo>) -> Result<()> {
     let voter = ctx.accounts.voter.load()?;
     let registrar = ctx.accounts.registrar.load()?;
     let usable_weight = if can_register {
-        Some(
-            voter
-                .weight_locked_guaranteed(&registrar, now_ts as i64, distribution.weight_ts as i64)
-                .map_err(|err| {
-                    msg!("vsr error: {}", err);
-                    ErrorKind::VoterStakeRegistryError
-                })?,
-        )
+        Some(distribution.voter_weight(&registrar, &voter)?)
     } else {
         None
     };

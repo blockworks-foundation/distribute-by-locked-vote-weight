@@ -3,6 +3,10 @@ use crate::state::*;
 use anchor_lang::prelude::*;
 use anchor_spl::token::TokenAccount;
 
+/// Starts the claim phase. Can be called by anyone once registration_end_ts is past.
+///
+/// This instruction is necessary because the distribution needs to track the number
+/// of tokens that were available in the vault before the first Claim call.
 #[derive(Accounts)]
 pub struct StartClaimPhase<'info> {
     #[account(

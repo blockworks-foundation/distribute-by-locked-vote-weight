@@ -2,6 +2,7 @@ use crate::error::*;
 use crate::state::*;
 use anchor_lang::prelude::*;
 
+/// Debug-only instruction, used to advance time in tests
 #[derive(Accounts)]
 #[instruction(time_offset: i64)]
 pub struct SetTimeOffset<'info> {
@@ -10,7 +11,6 @@ pub struct SetTimeOffset<'info> {
     pub admin: Signer<'info>,
 }
 
-/// A debug-only instruction that advances the time.
 pub fn set_time_offset(ctx: Context<SetTimeOffset>, time_offset: i64) -> Result<()> {
     // TODO: Limit using this instruction to one specific admin key in tests
     let distribution = &mut ctx.accounts.distribution.load_mut()?;
