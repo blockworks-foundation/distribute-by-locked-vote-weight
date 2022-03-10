@@ -3,13 +3,38 @@
 use program_test::*;
 use solana_program_test::*;
 use solana_sdk::{
+    pubkey::Pubkey,
     signature::{Keypair, Signer},
     transport::TransportError,
 };
 
+use distribute_by_locked_vote_weight::events;
 use distribute_by_locked_vote_weight::state::*;
 
 mod program_test;
+
+fn deserialize_event<T: anchor_lang::Event>(event: &str) -> Option<T> {
+    let data = base64::decode(event).ok()?;
+    if data.len() < 8 || data[0..8] != T::discriminator() {
+        return None;
+    }
+    T::try_from_slice(&data[8..]).ok()
+}
+
+async fn get_info(solana: &SolanaCookie, distribution: Pubkey, voter: Pubkey) -> events::Info {
+    solana.advance_by_slots(1).await;
+    send_tx(
+        solana,
+        LogInfoInstruction {
+            distribution,
+            voter,
+        },
+    )
+    .await
+    .unwrap();
+    let log = solana.program_log();
+    deserialize_event::<distribute_by_locked_vote_weight::events::Info>(&log[1]).unwrap()
+}
 
 // This is an unspecific happy-case test that runs through a particular distribution.
 #[tokio::test]
@@ -64,6 +89,18 @@ async fn test_full_lifecycle() -> Result<(), TransportError> {
         .transfer_token(payer_mint0_account, payer, vault, distribution_amount)
         .await;
 
+    // Check info before any participants are created
+    let info_event = get_info(solana, distribution, voter0.pubkey).await;
+    assert_eq!(info_event.participant_total_weight, 0);
+    assert_eq!(info_event.distribution_amount, distribution_amount);
+    assert!(!info_event.can_start_claim_phase);
+    assert!(!info_event.in_claim_phase);
+    // -1 is due to rounding down as end_ts > now_ts
+    let weight0 = voter0.locked_amount * 12 / 60 - 1;
+    assert_eq!(info_event.usable_weight, Some(weight0));
+    assert!(info_event.registered_weight.is_none());
+
+    // Participant 0
     let accounts = send_tx(
         solana,
         CreateParticipantInstruction {
@@ -77,10 +114,9 @@ async fn test_full_lifecycle() -> Result<(), TransportError> {
     let participant0 = accounts.participant;
 
     let participant_data: Participant = solana.get_account(participant0).await;
-    // -1 is due to rounding down as end_ts > now_ts
-    let weight0 = voter0.locked_amount * 12 / 60 - 1;
     assert_eq!(participant_data.weight, weight0);
 
+    // Participant 1
     let accounts = send_tx(
         solana,
         CreateParticipantInstruction {
@@ -96,6 +132,18 @@ async fn test_full_lifecycle() -> Result<(), TransportError> {
     let participant_data: Participant = solana.get_account(participant1).await;
     let weight1 = voter1.locked_amount * 12 / 60 - 1;
     assert_eq!(participant_data.weight, weight1);
+
+    // Check info after participants are created
+    let info_event = get_info(solana, distribution, voter0.pubkey).await;
+    assert_eq!(
+        info_event.participant_total_weight,
+        (weight0 + weight1) as u128
+    );
+    assert_eq!(info_event.distribution_amount, distribution_amount);
+    assert!(!info_event.can_start_claim_phase);
+    assert!(!info_event.in_claim_phase);
+    assert_eq!(info_event.usable_weight, Some(weight0));
+    assert_eq!(info_event.registered_weight, Some(weight0));
 
     //
     // STEP 1: go to claim phase
@@ -115,10 +163,21 @@ async fn test_full_lifecycle() -> Result<(), TransportError> {
     .await
     .unwrap();
 
-    solana.advance_by_slots(2).await;
+    // Check that it's reflected in info
+    let info_event = get_info(solana, distribution, voter0.pubkey).await;
+    assert!(info_event.can_start_claim_phase);
+    assert!(!info_event.in_claim_phase);
+    assert_eq!(info_event.usable_weight, None);
+
+    solana.advance_by_slots(1).await;
     send_tx(solana, StartClaimPhaseInstruction { distribution })
         .await
         .unwrap();
+
+    // Check that it's reflected in info
+    let info_event = get_info(solana, distribution, voter0.pubkey).await;
+    assert!(!info_event.can_start_claim_phase);
+    assert!(info_event.in_claim_phase);
 
     //
     // STEP 3: claim
@@ -142,7 +201,10 @@ async fn test_full_lifecycle() -> Result<(), TransportError> {
     assert!(solana.get_account_data(participant0).await.is_none());
 
     let balance = solana.token_account_balance(payer_mint0_account).await;
-    assert_eq!(balance, start_balance - distribution_amount + distribution_amount * weight0 / (weight0 + weight1));
+    assert_eq!(
+        balance,
+        start_balance - distribution_amount + distribution_amount * weight0 / (weight0 + weight1)
+    );
 
     send_tx(
         solana,
@@ -161,7 +223,12 @@ async fn test_full_lifecycle() -> Result<(), TransportError> {
 
     // rounding down will happen for fractional amounts
     let vault_balance = solana.token_account_balance(vault).await;
-    assert_eq!(vault_balance, distribution_amount - (distribution_amount * weight0) / (weight0 + weight1) - (distribution_amount * weight1) / (weight0 + weight1));
+    assert_eq!(
+        vault_balance,
+        distribution_amount
+            - (distribution_amount * weight0) / (weight0 + weight1)
+            - (distribution_amount * weight1) / (weight0 + weight1)
+    );
     let balance = solana.token_account_balance(payer_mint0_account).await;
     assert_eq!(balance, start_balance - vault_balance);
 

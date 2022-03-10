@@ -45,10 +45,12 @@ pub fn create_participant(ctx: Context<CreateParticipant>) -> Result<()> {
 
     let voter = ctx.accounts.voter.load()?;
     let registrar = ctx.accounts.registrar.load()?;
-    let weight = voter.weight_locked_guaranteed(&registrar, now_ts as i64, distribution.weight_ts as i64).map_err(|err| {
-        msg!("vsr error: {}", err);
-        ErrorKind::VoterStakeRegistryError
-    })?;
+    let weight = voter
+        .weight_locked_guaranteed(&registrar, now_ts as i64, distribution.weight_ts as i64)
+        .map_err(|err| {
+            msg!("vsr error: {}", err);
+            ErrorKind::VoterStakeRegistryError
+        })?;
     require!(weight > 0, ErrorKind::NoLockedVoteWeight);
 
     let mut participant = ctx.accounts.participant.load_init()?;

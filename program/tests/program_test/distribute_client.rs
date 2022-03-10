@@ -256,3 +256,46 @@ impl<'keypair> ClientInstruction for ClaimInstruction<'keypair> {
         vec![self.voter_authority]
     }
 }
+
+pub struct LogInfoInstruction {
+    pub distribution: Pubkey,
+    pub voter: Pubkey,
+}
+#[async_trait::async_trait(?Send)]
+impl ClientInstruction for LogInfoInstruction {
+    type Accounts = distribute_by_locked_vote_weight::accounts::LogInfo;
+    type Instruction = distribute_by_locked_vote_weight::instruction::LogInfo;
+    async fn to_instruction(
+        &self,
+        account_loader: impl ClientAccountLoader + 'async_trait,
+    ) -> (Self::Accounts, instruction::Instruction) {
+        let program_id = distribute_by_locked_vote_weight::id();
+        let instruction = Self::Instruction {};
+
+        let participant = Pubkey::find_program_address(
+            &[
+                self.distribution.as_ref(),
+                b"participant".as_ref(),
+                self.voter.as_ref(),
+            ],
+            &program_id,
+        )
+        .0;
+        let distribution: Distribution = account_loader.load(&self.distribution).await.unwrap();
+
+        let accounts = Self::Accounts {
+            distribution: self.distribution,
+            vault: distribution.vault,
+            participant,
+            voter: self.voter,
+            registrar: distribution.registrar,
+        };
+
+        let instruction = make_instruction(program_id, &accounts, instruction);
+        (accounts, instruction)
+    }
+
+    fn signers(&self) -> Vec<&Keypair> {
+        vec![]
+    }
+}

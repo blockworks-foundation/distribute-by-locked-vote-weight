@@ -3,6 +3,7 @@ use error::*;
 use instructions::*;
 
 mod error;
+pub mod events;
 mod instructions;
 pub mod state;
 
@@ -43,5 +44,9 @@ pub mod distribute_by_locked_vote_weight {
 
     pub fn set_time_offset(ctx: Context<SetTimeOffset>, time_offset: i64) -> Result<()> {
         instructions::set_time_offset(ctx, time_offset)
+    }
+
+    pub fn log_info(ctx: Context<LogInfo>) -> Result<()> {
+        instructions::log_info(ctx)
     }
 }

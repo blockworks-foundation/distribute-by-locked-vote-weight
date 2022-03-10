@@ -37,10 +37,12 @@ pub fn update_participant(ctx: Context<UpdateParticipant>) -> Result<()> {
     // compute new weight
     let voter = ctx.accounts.voter.load()?;
     let registrar = ctx.accounts.registrar.load()?;
-    let weight = voter.weight_locked_guaranteed(&registrar, now_ts as i64, distribution.weight_ts as i64).map_err(|err| {
-        msg!("vsr error: {}", err);
-        ErrorKind::VoterStakeRegistryError
-    })?;
+    let weight = voter
+        .weight_locked_guaranteed(&registrar, now_ts as i64, distribution.weight_ts as i64)
+        .map_err(|err| {
+            msg!("vsr error: {}", err);
+            ErrorKind::VoterStakeRegistryError
+        })?;
     require!(weight > 0, ErrorKind::NoLockedVoteWeight);
 
     // unregister old weight and set the new one
