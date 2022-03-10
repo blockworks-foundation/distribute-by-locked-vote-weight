@@ -27,6 +27,9 @@ pub struct Distribution {
     /// Debug only: time offset, to allow tests to move forward in time.
     pub time_offset: i64,
 
+    pub participant_count: u32,
+    pub claim_count: u32,
+
     pub bump: u8,
 
     /// Did someone call StartClaimPhase after registration_end_ts?
@@ -34,7 +37,7 @@ pub struct Distribution {
 
     pub reserved: [u8; 38],
 }
-const_assert!(std::mem::size_of::<Distribution>() == 4 * 32 + 7 * 8 + 2 + 38);
+const_assert!(std::mem::size_of::<Distribution>() == 4 * 32 + 7 * 8 + 2 * 4 + 2 + 38);
 const_assert!(std::mem::size_of::<Distribution>() % 8 == 0);
 
 impl Distribution {

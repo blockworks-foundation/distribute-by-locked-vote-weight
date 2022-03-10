@@ -6,6 +6,7 @@ use anchor_spl::token::{self, Token, TokenAccount};
 #[derive(Accounts)]
 pub struct Claim<'info> {
     #[account(
+        mut,
         has_one = vault,
     )]
     pub distribution: AccountLoader<'info, Distribution>,
@@ -45,6 +46,11 @@ impl<'info> Claim<'info> {
 }
 
 pub fn claim(ctx: Context<Claim>) -> Result<()> {
+    {
+        let mut distribution = ctx.accounts.distribution.load_mut()?;
+        distribution.claim_count = distribution.claim_count.checked_add(1).unwrap();
+    }
+
     let distribution = ctx.accounts.distribution.load()?;
     require!(distribution.in_claim_phase, ErrorKind::NotInClaimPhase);
 

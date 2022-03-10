@@ -64,6 +64,7 @@ pub fn create_participant(ctx: Context<CreateParticipant>) -> Result<()> {
         .participant_total_weight
         .checked_add(weight.into())
         .unwrap();
+    distribution.participant_count = distribution.participant_count.checked_add(1).unwrap();
 
     Ok(())
 }
