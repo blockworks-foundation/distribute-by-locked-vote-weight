@@ -150,7 +150,7 @@ async fn test_full_lifecycle() -> Result<(), TransportError> {
             participant: participant0,
             voter_authority: &voter0.authority,
             target_token: payer_mint0_account,
-            sol_destination: payer.pubkey(),
+            payer: payer.pubkey(),
         },
     )
     .await
@@ -197,7 +197,7 @@ async fn test_full_lifecycle() -> Result<(), TransportError> {
             participant: participant0,
             voter_authority: &voter0.authority,
             target_token: payer_mint0_account,
-            sol_destination: payer.pubkey(),
+            payer: payer.pubkey(),
         },
     )
     .await
@@ -218,7 +218,7 @@ async fn test_full_lifecycle() -> Result<(), TransportError> {
             participant: participant1,
             voter_authority: &voter1.authority,
             target_token: payer_mint0_account,
-            sol_destination: payer.pubkey(),
+            payer: payer.pubkey(),
         },
     )
     .await

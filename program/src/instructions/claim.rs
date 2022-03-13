@@ -19,7 +19,8 @@ pub struct Claim<'info> {
         mut,
         has_one = distribution,
         has_one = voter_authority,
-        close = sol_destination,
+        has_one = payer,
+        close = payer,
     )]
     pub participant: AccountLoader<'info, Participant>,
 
@@ -32,7 +33,7 @@ pub struct Claim<'info> {
     pub voter_authority: Signer<'info>,
 
     #[account(mut)]
-    pub sol_destination: UncheckedAccount<'info>,
+    pub payer: UncheckedAccount<'info>,
 
     pub token_program: Program<'info, Token>,
 }

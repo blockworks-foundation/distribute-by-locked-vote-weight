@@ -56,6 +56,7 @@ pub fn create_participant(ctx: Context<CreateParticipant>) -> Result<()> {
         distribution: ctx.accounts.distribution.key(),
         voter: ctx.accounts.voter.key(),
         voter_authority: voter.voter_authority,
+        payer: ctx.accounts.payer.key(),
         weight,
     };
     distribution.participant_total_weight = distribution
